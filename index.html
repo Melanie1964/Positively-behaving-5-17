@@ -1,1 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Positively Behaving - Teacher SDQ & Action Plan Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
+<!-- Login Gate -->
+<div id="login-container" style="text-align: center; padding: 60px 20px; font-family: sans-serif; max-width: 500px; margin: 40px auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h2>Positively Behaving Hub</h2>
+    <p>Please enter your registered school email address to unlock your tools:</p>
+    <input type="email" id="school-email" placeholder="name@school.sch.uk" style="padding: 12px; width: 100%; max-width: 300px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+    <br>
+    <button onclick="checkAccess()" style="padding: 12px 24px; font-size: 16px; background: #112233; color: #fff; border: none; cursor: pointer; border-radius: 4px;">Unlock Hub</button>
+</div>
+  <!-- Navigation Wrapper (Hidden by default until email is verified) -->
+        <div id="nav-container" style="display: none;" class="max-w-4xl mx-auto mb-4 flex flex-wrap justify-between items-center bg-white p-3 rounded shadow-sm gap-2">
+            <div class="space-x-1 text-xs font-bold">
+                <button onclick="switchTab('baseline')" id="btnBaseline" class="px-3 py-2 rounded bg-[#112233] text-white transition">Baseline SDQ</button>
+                <button onclick="switchTab('followup')" id="btnFollowup" class="px-3 py-2 rounded bg-slate-200 text-slate-700 transition">1-Month Follow-Up SDQ</button>
+                <button onclick="switchTab('comparison')" id="btnComparison" class="px-3 py-2 rounded bg-slate-200 text-slate-700 transition">Progress Comparison Report</button>
+            </div>
+            <div>
+                <button onclick="endSession()" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 text-white transition text-xs font-bold uppercase tracking-wider">End Session / New Child</button>
+            </div>
+    <div id="appContainer" class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-[#112233] text-white p-6 border-b-4 border-[#c59b27] flex justify-between items-center">
+            <div>
+                <h1 id="headerTitle" class="text-xl md:text-2xl font-bold tracking-wide uppercase">Baseline Assessment</h1>
+                <p class="text-xs md:text-sm text-[#e2cb83] font-semibold">Preschool Teacher SDQ (Ages 2–4) & Action Plan Hub</p>
+            </div>
+            <div class="text-right text-xs text-slate-200">
+                <strong class="text-white">Melanie Horne</strong><br>
+                <a href="mailto:Positively_Behaving@outlook.com" class="text-[#e2cb83] underline">Positively_Behaving@outlook.com</a><br>
+                Tel: 07794194729
+            </div>
+        </div>
 
+        <div class="p-6 md:p-8 space-y-6">
+            
+            <div id="questionnaireSection" class="space-y-6">
+                <div class="bg-[#eaf1f6] border-l-4 border-[#112233] p-4 rounded space-y-3">
+                    <h2 class="text-sm font-bold text-[#112233] uppercase">Child & Setting Details (Use Alias e.g. Child 1)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold text-slate-700">
+                        <div>
+                            <label class="block mb-1">Child's Name / Alias:</label>
+                            <input type="text" id="childName" placeholder="e.g. Child 1" class="w-full p-2 border border-slate-300 rounded bg-white text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block mb-1">Age / D.O.B:</label>
+                            <input type="text" id="childDob" placeholder="e.g. 3 yrs 8 mos" class="w-full p-2 border border-slate-300 rounded bg-white text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block mb-1">Setting / Class:</label>
+                            <input type="text" id="childSetting" placeholder="e.g. Acorn Nursery" class="w-full p-2 border border-slate-300 rounded bg-white text-slate-800">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="instructionText" class="text-xs italic text-slate-600 bg-slate-50 p-3 border border-slate-200 rounded">
+                    Please answer on the basis of the child's behaviour over <strong>the last six months</strong>.
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-[#112233] uppercase bg-[#112233] text-white p-2 rounded">Part 1: Strengths & Difficulties Questionnaire (Ages 2–4)</h3>
+                    <div id="sdqQuestions" class="space-y-2"></div>
+                </div>
+
+                <div class="text-center pt-4 space-y-2">
+                    <p class="text-xs text-amber-700 font-semibold italic">⚠️ Important: You must click this button to save and analyze scores before viewing the final progress comparison report.</p>
+                    <button onclick="processAndSaveAssessment()" class="bg-[#112233] hover:bg-[#1a334d] text-white font-bold px-8 py-3 rounded shadow transition uppercase text-xs tracking-wider border-b-2 border-[#c59b27]">
+                        Analyze Scores & Generate Report
+                    </button>
+                </div>
+            </div>
+
+            <div id="comparisonSection" class="hidden space-y-6">
+                <div id="missingDataAlert" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded space-y-2">
+                    <h2 class="text-sm font-bold text-amber-800 uppercase">⚠️ Action Required: Missing Analyzed Data</h2>
+                    <p class="text-xs text-amber-700">You have not clicked <strong>"Analyze Scores"</strong> for one or more questionnaires yet. Please use the tabs above to go back, complete your forms, and click Analyze. Your entered answers are safely saved!</p>
+                </div>
+
+                <div class="bg-[#eaf1f6] border-l-4 border-[#112233] p-4 rounded space-y-2">
+                    <h2 class="text-sm font-bold text-[#112233] uppercase">Progress Comparison Tool (Baseline vs. 1-Month Follow-Up)</h2>
+                    <p class="text-xs text-slate-600">Successfully captured session scores are loaded below automatically.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold text-slate-700 bg-slate-50 p-4 rounded border border-slate-200">
+                    <div>
+                        <label class="block mb-1">Child's Name / Alias:</label>
+                        <input type="text" id="compName" placeholder="e.g. Child 1" class="w-full p-2 border border-slate-300 rounded bg-white text-slate-800" readonly>
+                    </div>
+                    <div>
+                        <label class="block mb-1">Age / D.O.B:</label>
+                        <input type="text" id="compDob" placeholder="e.g. 3 yrs 8 mos" class="w-full p-2 border border-slate-300 rounded bg-white text-slate-800" readonly>
+                    </div>
+                    <div>
+                        <label class="block mb-1">Setting / Class:</label>
+                        <input type="text" id="compSetting" placeholder="e.g. Acorn Nursery" class="w-full p-2 border border-slate-300 rounded bg-white text-slate-800" readonly>
+                    </div>
+                </div>
+
+                <div class="border border-slate-300 rounded p-4 space-y-3">
+                    <h3 class="font-bold text-[#112233] uppercase text-xs tracking-wide">Captured Subscale Totals</h3>
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 border-b border-slate-300 text-slate-700">
+                                <th class="p-2">SDQ Subscale</th>
+                                <th class="p-2">Baseline Score</th>
+                                <th class="p-2">1-Month Follow-Up Score</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr>
+                                <td class="p-2 font-medium">Emotional Symptoms</td>
+                                <td class="p-2"><input type="number" id="baseEm" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                                <td class="p-2"><input type="number" id="folEm" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Conduct Problems</td>
+                                <td class="p-2"><input type="number" id="baseCo" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                                <td class="p-2"><input type="number" id="folCo" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Hyperactivity / Inattention</td>
+                                <td class="p-2"><input type="number" id="baseHy" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                                <td class="p-2"><input type="number" id="folHy" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Peer Problems</td>
+                                <td class="p-2"><input type="number" id="basePe" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                                <td class="p-2"><input type="number" id="folPe" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Prosocial Strength (Higher is better)</td>
+                                <td class="p-2"><input type="number" id="basePr" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                                <td class="p-2"><input type="number" id="folPr" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                            </tr>
+                            <tr class="font-bold bg-slate-50">
+                                <td class="p-2">Total Difficulties Score (Sum of 4 problem scales)</td>
+                                <td class="p-2"><input type="number" id="baseTot" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                                <td class="p-2"><input type="number" id="folTot" value="0" class="w-20 p-1 border rounded text-center bg-slate-100" readonly></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-center pt-4 pb-4" id="comparisonButtonWrapper">
+                    <button onclick="generateComparisonReport()" class="bg-[#112233] hover:bg-[#1a334d] text-white font-bold px-8 py-3 rounded shadow transition uppercase text-xs tracking-wider border-b-2 border-[#c59b27]">
+                        Generate Progress Comparison Report PDF
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="printArea" class="hidden max-w-4xl mx-auto bg-white p-6 rounded shadow text-xs space-y-4">
+        <div class="flex justify-between items-center border-b-2 border-[#112233] pb-3">
+            <div>
+                <h2 id="printReportTitle" class="text-base font-bold text-[#112233] uppercase">Individual Behaviour Action Plan & Follow-Up</h2>
+                <p class="text-slate-600 font-semibold">Positively Behaving Framework • Course Strategy Output</p>
+            </div>
+            <div class="text-right space-y-1">
+                <span class="text-slate-600 text-[10px] block"><strong>Melanie Horne</strong><br>Positively_Behaving@outlook.com</span>
+                <button onclick="endSession()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-2.5 py-1 rounded text-[10px] uppercase tracking-wider">End Session / New Child</button>
+            </div>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 rounded border border-slate-200 grid grid-cols-3 gap-4 font-medium text-slate-700">
+            <div><strong>Child / Alias:</strong> <span id="resName"></span></div>
+            <div><strong>Age / D.O.B:</strong> <span id="resDob"></span></div>
+            <div><strong>Setting:</strong> <span id="resSetting"></span></div>
+        </div>
+
+        <div id="standardReportBox" class="border border-slate-300 rounded p-3 space-y-2">
+            <h3 class="font-bold text-[#112233] uppercase tracking-wide" id="tableHeaderTitle">SDQ Subscale Analysis & Banding</h3>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 border-b border-slate-300 text-slate-700">
+                        <th class="p-1.5">Subscale</th>
+                        <th class="p-1.5">Score</th>
+                        <th class="p-1.5">Normative Banding (Ages 2-4)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    <tr><td class="p-1.5">Emotional Symptoms</td><td class="p-1.5" id="scoreEmotional">-</td><td class="p-1.5" id="bandEmotional">-</td></tr>
+                    <tr><td class="p-1.5">Conduct Problems</td><td class="p-1.5" id="scoreConduct">-</td><td class="p-1.5" id="bandConduct">-</td></tr>
+                    <tr><td class="p-1.5">Hyperactivity / Inattention</td><td class="p-1.5" id="scoreHyper">-</td><td class="p-1.5" id="bandHyper">-</td></tr>
+                    <tr><td class="p-1.5">Peer Problems</td><td class="p-1.5" id="scorePeer">-</td><td class="p-1.5" id="bandPeer">-</td></tr>
+                    <tr><td class="p-1.5">Prosocial Strength</td><td class="p-1.5" id="scoreProsocial">-</td><td class="p-1.5" id="bandProsocial">-</td></tr>
+                    <tr class="font-bold bg-slate-50"><td class="p-1.5">Total Difficulties Score</td><td class="p-1.5" id="scoreTotal">-</td><td class="p-1.5" id="bandTotal">-</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="comparisonReportBox" class="hidden border border-slate-300 rounded p-3 space-y-2">
+            <h3 class="font-bold text-[#112233] uppercase tracking-wide">Baseline vs. 1-Month Follow-Up Progress Matrix</h3>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 border-b border-slate-300 text-slate-700">
+                        <th class="p-1.5">Subscale</th>
+                        <th class="p-1.5">Baseline</th>
+                        <th class="p-1.5">1-Month Follow-Up</th>
+                        <th class="p-1.5">Progress Outcome</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200" id="comparisonTableBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="strategyBoxContainer" class="border border-slate-300 rounded p-3 space-y-2">
+            <h3 class="font-bold text-[#112233] uppercase tracking-wide" id="strategyHeaderTitle">Part 2: Tailored Low-Confrontation Action Plan & Strategies</h3>
+            <div class="bg-[#eaf1f6] p-3 rounded border-l-4 border-[#112233] space-y-1">
+                <p class="font-bold text-[#112233]">Primary Focus Area Identified: <span id="primaryFocus" class="underline"></span></p>
+                <p id="strategyAdvice" class="text-slate-700 font-medium"></p>
+            </div>
+            <table id="strategyTable" class="w-full text-left border-collapse border border-slate-300 mt-2">
+                <thead>
+                    <tr class="bg-[#112233] text-white">
+                        <th class="p-1.5 border border-slate-300">Trigger / Antecedent</th>
+                        <th class="p-1.5 border border-slate-300">Low-Confrontation Strategy</th>
+                        <th class="p-1.5 border border-slate-300">Environmental Check</th>
+                        <th class="p-1.5 border border-slate-300">Success Criteria</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="p-1.5 border border-slate-300">Unstructured play transitions and group circle times.</td>
+                        <td class="p-1.5 border border-slate-300">Pre-warning transition timers; assign specialized helper role.</td>
+                        <td class="p-1.5 border border-slate-300">Quiet calm-down corner prepared in advance.</td>
+                        <td class="p-1.5 border border-slate-300">Independent transition within 30 seconds.</td>
+                    </tr>
+                    <tr>
+                        <td class="p-1.5 border border-slate-300">Sharing high-demand resources or denied requests.</td>
+                        <td class="p-1.5 border border-slate-300">Visual 'First/Then' boards and structured turn-taking cues.</td>
+                        <td class="p-1.5 border border-slate-300">Duplicate popular items available to avoid bottlenecks.</td>
+                        <td class="p-1.5 border border-slate-300">Verbal acceptance of waiting turn without escalation.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="tallyLogContainer" class="border border-slate-300 rounded p-3 space-y-2">
+            <h3 class="font-bold text-[#112233] uppercase tracking-wide">Part 3: Behaviour Monitoring & Private Tally Log</h3>
+            <table class="w-full text-center border-collapse border border-slate-300">
+                <thead>
+                    <tr class="bg-slate-200 text-slate-800">
+                        <th class="p-1.5 border border-slate-300 text-left">Session / Timeblock</th>
+                        <th class="p-1.5 border border-slate-300">Monday</th>
+                        <th class="p-1.5 border border-slate-300">Tuesday</th>
+                        <th class="p-1.5 border border-slate-300">Wednesday</th>
+                        <th class="p-1.5 border border-slate-300">Thursday</th>
+                        <th class="p-1.5 border border-slate-300">Friday</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="p-1.5 border border-slate-300 text-left font-medium">Morning Session</td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td></tr>
+                    <tr><td class="p-1.5 border border-slate-300 text-left font-medium">Lunchtime / Transition</td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td></tr>
+                    <tr><td class="p-1.5 border border-slate-300 text-left font-medium">Afternoon Session</td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td><td class="p-1.5 border border-slate-300"></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center pt-2 space-x-3">
+            <button onclick="downloadPDF()" class="bg-[#112233] text-white font-bold px-6 py-2 rounded shadow uppercase text-xs tracking-wider border-b-2 border-[#c59b27]">
+                Download PDF Report
+            </button>
+            <button onclick="returnToHub()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded text-xs">
+                Back to Hub / Forms
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'baseline';
+        
+        let savedFormStates = {
+            baseline: { name: "", dob: "", setting: "", answers: {} },
+            followup: { name: "", dob: "", setting: "", answers: {} }
+        };
+
+        let sessionData = {
+            baseline: null,
+            followup: null
+        };
+
+        const questions = [
+            { text: "Considerate of other people's feelings", sub: "prosocial", rev: false },
+            { text: "Restless, overactive, cannot stay still for long", sub: "hyper", rev: false },
+            { text: "Often complains of headaches, stomach-aches or sickness", sub: "emotional", rev: false },
+            { text: "Shares readily with other children (treats, toys, pencils etc.)", sub: "prosocial", rev: false },
+            { text: "Often has temper tantrums or hot tempers", sub: "conduct", rev: false },
+            { text: "Rather solitary, tends to play alone", sub: "peer", rev: false },
+            { text: "Generally obedient, usually does what adults request", sub: "conduct", rev: true },
+            { text: "Many worries, often seems worried", sub: "emotional", rev: false },
+            { text: "Helpful if someone is hurt, upset or feeling ill", sub: "prosocial", rev: false },
+            { text: "Constantly fidgeting or squirming", sub: "hyper", rev: false },
+            { text: "Has at least one good friend", sub: "peer", rev: true },
+            { text: "Often fights with other children or bullies them", sub: "conduct", rev: false },
+            { text: "Often unhappy, down-hearted or tearful", sub: "emotional", rev: false },
+            { text: "Generally liked by other children", sub: "peer", rev: true },
+            { text: "Easily distracted, concentration wanders", sub: "hyper", rev: false },
+            { text: "Nervous or clingy in new situations, easily loses confidence", sub: "emotional", rev: false },
+            { text: "Kind to younger children", sub: "prosocial", rev: false },
+            { text: "Often argumentative with adults", sub: "conduct", rev: false },
+            { text: "Picked on or bullied by other children", sub: "peer", rev: true },
+            { text: "Often volunteers to help others (parents, teachers, other children)", sub: "prosocial", rev: false },
+            { text: "Can stop and think things out before acting", sub: "hyper", rev: true },
+            { text: "Can be spiteful to others", sub: "conduct", rev: false },
+            { text: "Gets on better with adults than with other children", sub: "peer", rev: true },
+            { text: "Many fears, easily scared", sub: "emotional", rev: false },
+            { text: "Sees tasks through to the end, good attention span", sub: "hyper", rev: true }
+        ];
+
+        const container = document.getElementById('sdqQuestions');
+        questions.forEach((q, index) => {
+            const div = document.createElement('div');
+            div.className = "flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-2.5 border border-slate-200 rounded text-xs";
+            div.innerHTML = `
+                <span class="font-medium text-slate-800 mb-2 md:mb-0">${index + 1}. ${q.text}</span>
+                <div class="space-x-3 text-slate-600 font-semibold">
+                    <label><input type="radio" name="q${index}" value="0" checked> Not (0)</label>
+                    <label><input type="radio" name="q${index}" value="1"> Some (1)</label>
+                    <label><input type="radio" name="q${index}" value="2"> Yes (2)</label>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        function captureCurrentFormState() {
+            if (currentMode === 'baseline' || currentMode === 'followup') {
+                savedFormStates[currentMode].name = document.getElementById('childName').value;
+                savedFormStates[currentMode].dob = document.getElementById('childDob').value;
+                savedFormStates[currentMode].setting = document.getElementById('childSetting').value;
+                
+                questions.forEach((q, index) => {
+                    const radios = document.getElementsByName(`q${index}`);
+                    for (const r of radios) {
+                        if (r.checked) {
+                            savedFormStates[currentMode].answers[index] = r.value;
+                            break;
+                        }
+                    }
+                });
+            }
+        }
+
+        function restoreFormState(mode) {
+            const state = savedFormStates[mode];
+            document.getElementById('childName').value = state.name;
+            document.getElementById('childDob').value = state.dob;
+            document.getElementById('childSetting').value = state.setting;
+
+            questions.forEach((q, index) => {
+                const val = state.answers[index] !== undefined ? state.answers[index] : "0";
+                const radios = document.getElementsByName(`q${index}`);
+                for (const r of radios) {
+                    if (r.value === val) {
+                        r.checked = true;
+                        break;
+                    }
+                }
+            });
+        }
+
+        function switchTab(mode) {
+            captureCurrentFormState();
+            currentMode = mode;
+            
+            const btnBase = document.getElementById('btnBaseline');
+            const btnFollow = document.getElementById('btnFollowup');
+            const btnComp = document.getElementById('btnComparison');
+            const headerTitle = document.getElementById('headerTitle');
+            const instructionText = document.getElementById('instructionText');
+            const questionnaireSec = document.getElementById('questionnaireSection');
+            const comparisonSec = document.getElementById('comparisonSection');
+            const appContainer = document.getElementById('appContainer');
+            const printArea = document.getElementById('printArea');
+
+            appContainer.style.display = 'block';
+            printArea.classList.add('hidden');
+
+            btnBase.className = "px-3 py-2 rounded bg-slate-200 text-slate-700 transition";
+            btnFollow.className = "px-3 py-2 rounded bg-slate-200 text-slate-700 transition";
+            btnComp.className = "px-3 py-2 rounded bg-slate-200 text-slate-700 transition";
+
+            if (mode === 'baseline') {
+                btnBase.className = "px-3 py-2 rounded bg-[#112233] text-white transition";
+                headerTitle.innerText = "Baseline Assessment";
+                instructionText.innerHTML = "Please answer on the basis of the child's behaviour over <strong>the last six months</strong>.";
+                questionnaireSec.classList.remove('hidden');
+                comparisonSec.classList.add('hidden');
+                restoreFormState('baseline');
+            } else if (mode === 'followup') {
+                btnFollow.className = "px-3 py-2 rounded bg-[#112233] text-white transition";
+                headerTitle.innerText = "1-Month Follow-Up Review";
+                instructionText.innerHTML = "Please answer on the basis of the child's behaviour over <strong>the last month</strong> following strategy implementation.";
+                questionnaireSec.classList.remove('hidden');
+                comparisonSec.classList.add('hidden');
+                restoreFormState('followup');
+            } else {
+                btnComp.className = "px-3 py-2 rounded bg-[#112233] text-white transition";
+                headerTitle.innerText = "Progress Comparison Report";
+                questionnaireSec.classList.add('hidden');
+                comparisonSec.classList.remove('hidden');
+                checkAndPopulateComparison();
+            }
+        }
+
+        function checkAndPopulateComparison() {
+            const alertBox = document.getElementById('missingDataAlert');
+            const btnWrapper = document.getElementById('comparisonButtonWrapper');
+
+            if (!sessionData.baseline && !sessionData.followup) {
+                alertBox.classList.remove('hidden');
+                btnWrapper.classList.add('hidden');
+            } else {
+                alertBox.classList.add('hidden');
+                btnWrapper.classList.remove('hidden');
+                populateComparisonFields();
+            }
+        }
+
+        function populateComparisonFields() {
+            if (sessionData.baseline) {
+                document.getElementById('compName').value = sessionData.baseline.name || "";
+                document.getElementById('compDob').value = sessionData.baseline.dob || "";
+                document.getElementById('compSetting').value = sessionData.baseline.setting || "";
+
+                document.getElementById('baseEm').value = sessionData.baseline.scores.emotional;
+                document.getElementById('baseCo').value = sessionData.baseline.scores.conduct;
+                document.getElementById('baseHy').value = sessionData.baseline.scores.hyper;
+                document.getElementById('basePe').value = sessionData.baseline.scores.peer;
+                document.getElementById('basePr').value = sessionData.baseline.scores.prosocial;
+            }
+            if (sessionData.followup) {
+                document.getElementById('folEm').value = sessionData.followup.scores.emotional;
+                document.getElementById('folCo').value = sessionData.followup.scores.conduct;
+                document.getElementById('folHy').value = sessionData.followup.scores.hyper;
+                document.getElementById('folPe').value = sessionData.followup.scores.peer;
+                document.getElementById('folPr').value = sessionData.followup.scores.prosocial;
+            }
+            calculateComparisonTotals();
+        }
+
+        function calculateComparisonTotals() {
+            const baseTot = parseInt(document.getElementById('baseEm').value || 0) + 
+                            parseInt(document.getElementById('baseCo').value || 0) + 
+                            parseInt(document.getElementById('baseHy').value || 0) + 
+                            parseInt(document.getElementById('basePe').value || 0);
+            
+            const folTot = parseInt(document.getElementById('folEm').value || 0) + 
+                           parseInt(document.getElementById('folCo').value || 0) + 
+                           parseInt(document.getElementById('folHy').value || 0) + 
+                           parseInt(document.getElementById('folPe').value || 0);
+
+            document.getElementById('baseTot').value = baseTot;
+            document.getElementById('folTot').value = folTot;
+        }
+
+        function endSession() {
+            if (confirm("Are you sure you want to end this session and clear data to start with a new child?")) {
+                location.reload();
+            }
+        }
+
+        function returnToHub() {
+            document.getElementById('printArea').classList.add('hidden');
+            document.getElementById('appContainer').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function processAndSaveAssessment() {
+            let scores = { emotional: 0, conduct: 0, hyper: 0, peer: 0, prosocial: 0 };
+
+            questions.forEach((q, index) => {
+                const radios = document.getElementsByName(`q${index}`);
+                let val = 0;
+                for (const r of radios) {
+                    if (r.checked) { val = parseInt(r.value); break; }
+                }
+                if (q.rev) { val = 2 - val; }
+                scores[q.sub] += val;
+            });
+
+            const totalDiff = scores.emotional + scores.conduct + scores.hyper + scores.peer;
+            const name = document.getElementById('childName').value || "Child 1";
+            const dob = document.getElementById('childDob').value || "N/A";
+            const setting = document.getElementById('childSetting').value || "N/A";
+
+            captureCurrentFormState();
+            sessionData[currentMode] = { name, dob, setting, scores, totalDiff };
+
+            document.getElementById('resName').innerText = name;
+            document.getElementById('resDob').innerText = dob;
+            document.getElementById('resSetting').innerText = setting;
+
+            document.getElementById('scoreEmotional').innerText = scores.emotional;
+            document.getElementById('scoreConduct').innerText = scores.conduct;
+            document.getElementById('scoreHyper').innerText = scores.hyper;
+            document.getElementById('scorePeer').innerText = scores.peer;
+            document.getElementById('scoreProsocial').innerText = scores.prosocial;
+            document.getElementById('scoreTotal').innerText = totalDiff;
+
+            document.getElementById('bandEmotional').innerText = scores.emotional >= 5 ? "High / Concern" : "Close to Average";
+            document.getElementById('bandConduct').innerText = scores.conduct >= 4 ? "High / Concern" : "Close to Average";
+            document.getElementById('bandHyper').innerText = scores.hyper >= 7 ? "High / Concern" : "Close to Average";
+            document.getElementById('bandPeer').innerText = scores.peer >= 4 ? "High / Concern" : "Close to Average";
+            document.getElementById('bandTotal').innerText = totalDiff >= 17 ? "High (Action Required)" : "Close to Average";
+
+            let highestSub = "Conduct Problems";
+            let maxVal = scores.conduct;
+            let advice = "Focus on low-confrontation management, preemptive transition warnings, and positive reinforcement for calm behavior.";
+            
+            if (scores.hyper > maxVal) { highestSub = "Hyperactivity / Inattention"; maxVal = scores.hyper; advice = "Incorporate movement breaks, clear visual schedules, and chunked instructions to support focus and sustained attention."; }
+            if (scores.emotional > maxVal) { highestSub = "Emotional Symptoms"; maxVal = scores.emotional; advice = "Establish a safe 'calm-down' space, use emotion-naming cards, and build predictable routines to lower anxiety."; }
+            if (scores.peer > maxVal) { highestSub = "Peer Problems"; maxVal = scores.peer; advice = "Facilitate structured small-group cooperative games and adult-guided social interactions to build positive peer relationships."; }
+
+            document.getElementById('primaryFocus').innerText = highestSub;
+            document.getElementById('strategyAdvice').innerText = advice;
+
+            if (currentMode === 'baseline') {
+                document.getElementById('printReportTitle').innerText = "Individual Behaviour Action Plan (Baseline)";
+            } else {
+                document.getElementById('printReportTitle').innerText = "1-Month Follow-Up Progress Review";
+            }
+
+            document.getElementById('standardReportBox').classList.remove('hidden');
+            document.getElementById('comparisonReportBox').classList.add('hidden');
+            document.getElementById('strategyBoxContainer').classList.remove('hidden');
+            document.getElementById('tallyLogContainer').classList.remove('hidden');
+
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('printArea').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function generateComparisonReport() {
+            calculateComparisonTotals();
+
+            document.getElementById('resName').innerText = document.getElementById('compName').value || "Child 1";
+            document.getElementById('resDob').innerText = document.getElementById('compDob').value || "N/A";
+            document.getElementById('resSetting').innerText = document.getElementById('compSetting').value || "N/A";
+
+            const metrics = [
+                { name: "Emotional Symptoms", base: parseInt(document.getElementById('baseEm').value || 0), fol: parseInt(document.getElementById('folEm').value || 0), lowerIsBetter: true },
+                { name: "Conduct Problems", base: parseInt(document.getElementById('baseCo').value || 0), fol: parseInt(document.getElementById('folCo').value || 0), lowerIsBetter: true },
+                { name: "Hyperactivity / Inattention", base: parseInt(document.getElementById('baseHy').value || 0), fol: parseInt(document.getElementById('folHy').value || 0), lowerIsBetter: true },
+                { name: "Peer Problems", base: parseInt(document.getElementById('basePe').value || 0), fol: parseInt(document.getElementById('folPe').value || 0), lowerIsBetter: true },
+                { name: "Prosocial Strength", base: parseInt(document.getElementById('basePr').value || 0), fol: parseInt(document.getElementById('folPr').value || 0), lowerIsBetter: false },
+                { name: "Total Difficulties Score", base: parseInt(document.getElementById('baseTot').value || 0), fol: parseInt(document.getElementById('folTot').value || 0), lowerIsBetter: true }
+            ];
+
+            const tbody = document.getElementById('comparisonTableBody');
+            tbody.innerHTML = "";
+
+            metrics.forEach(m => {
+                let diff = m.fol - m.base;
+                let outcomeText = "";
+                let badgeColor = "text-slate-600";
+
+                if (m.lowerIsBetter) {
+                    if (diff < 0) { outcomeText = `Improved (Decreased by ${Math.abs(diff)})`; badgeColor = "text-green-700 font-bold"; }
+                    else if (diff > 0) { outcomeText = `Increased difficulties (+${diff})`; badgeColor = "text-amber-700 font-bold"; }
+                    else { outcomeText = "Stable (No change)"; badgeColor = "text-slate-600"; }
+                } else {
+                    if (diff > 0) { outcomeText = `Improved (Increased by +${diff})`; badgeColor = "text-green-700 font-bold"; }
+                    else if (diff < 0) { outcomeText = `Decreased strength (${diff})`; badgeColor = "text-amber-700 font-bold"; }
+                    else { outcomeText = "Stable (No change)"; badgeColor = "text-slate-600"; }
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-1.5 font-medium">${m.name}</td>
+                    <td class="p-1.5">${m.base}</td>
+                    <td class="p-1.5">${m.fol}</td>
+                    <td class="p-1.5 ${badgeColor}">${outcomeText}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('printReportTitle').innerText = "Progress Comparison Report (Baseline vs. Follow-Up)";
+            document.getElementById('standardReportBox').classList.add('hidden');
+            document.getElementById('comparisonReportBox').classList.remove('hidden');
+            document.getElementById('strategyBoxContainer').classList.add('hidden');
+            document.getElementById('tallyLogContainer').classList.add('hidden');
+
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('printArea').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('printArea');
+            const opt = {
+                margin:       0.3,
+                filename:     currentMode === 'comparison' ? 'Positively_Behaving_Progress_Report.pdf' : (currentMode === 'followup' ? 'Positively_Behaving_FollowUp_Review.pdf' : 'Positively_Behaving_Baseline_Plan.pdf'),
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+        }
+    </script>
+    <script>
+    // Add your paying schools' emails to this list whenever a sale comes in
+    const authorizedEmails = [
+        "m19e64l@hotmail.com"
+    ];
+
+    function checkAccess() {
+        const userEmail = document.getElementById("school-email").value.trim().toLowerCase();
+        
+        if (authorizedEmails.includes(userEmail)) {
+            document.getElementById("login-container").style.display = "none";
+            // Unhide your app container
+            document.getElementById("appContainer").style.display = "block";
+            document.getElementById("nav-container").style.display = "flex";
+        } else {
+            alert("Email not recognized. Please ensure you use your purchasing school email or visit our Gumroad store to get a license.");
+        }
+    }
+
+    // Hide the main app container by default until logged in
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("appContainer").style.display = "none";
+        document.getElementById("nav-container").style.display = "none";
+    });
+</script>
+</body>
+</html>
