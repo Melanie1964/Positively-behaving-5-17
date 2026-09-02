@@ -8,35 +8,41 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
-<!-- Login Gate -->
-<div id="login-container" style="text-align: center; padding: 60px 20px; font-family: sans-serif; max-width: 500px; margin: 40px auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <h2>Positively Behaving Hub</h2>
-    <p>Please enter your registered school email address to unlock your tools:</p>
-    <input type="email" id="school-email" placeholder="name@school.sch.uk" style="padding: 12px; width: 100%; max-width: 300px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
-    <br>
-    <button onclick="checkAccess()" style="padding: 12px 24px; font-size: 16px; background: #112233; color: #fff; border: none; cursor: pointer; border-radius: 4px;">Unlock Hub</button>
-</div>
-  <!-- Navigation Wrapper (Hidden by default until email is verified) -->
-        <div id="nav-container" style="display: none;" class="max-w-4xl mx-auto mb-4 flex flex-wrap justify-between items-center bg-white p-3 rounded shadow-sm gap-2">
-            <div class="space-x-1 text-xs font-bold">
-                <button onclick="switchTab('baseline')" id="btnBaseline" class="px-3 py-2 rounded bg-[#112233] text-white transition">Baseline SDQ</button>
-                <button onclick="switchTab('followup')" id="btnFollowup" class="px-3 py-2 rounded bg-slate-200 text-slate-700 transition">1-Month Follow-Up SDQ</button>
-                <button onclick="switchTab('comparison')" id="btnComparison" class="px-3 py-2 rounded bg-slate-200 text-slate-700 transition">Progress Comparison Report</button>
-            </div>
-            <div>
-                <button onclick="endSession()" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 text-white transition text-xs font-bold uppercase tracking-wider">End Session / New Child</button>
-            </div>
-    <div id="appContainer" class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="bg-[#112233] text-white p-6 border-b-4 border-[#c59b27] flex justify-between items-center">
-            <div>
-                <h1 id="headerTitle" class="text-xl md:text-2xl font-bold tracking-wide uppercase">Baseline Assessment</h1>
-                <p class="text-xs md:text-sm text-[#e2cb83] font-semibold">School-Age Teacher SDQ (Ages 5–17) & Action Plan Hub</p>
-            </div>
-            <div class="text-right text-xs text-slate-200">
-                <strong class="text-white">Melanie Horne</strong><br>
-                <a href="mailto:Positively_Behaving@outlook.com" class="text-[#e2cb83] underline">Positively_Behaving@outlook.com</a><br>
-                Tel: 07794194729
-            </div>
+<script>
+(function() {
+    const SECRET_ACCESS_TOKEN = "PBH_SECURE_2026_ACCESS";
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenInUrl = urlParams.get('access_token');
+    const isUnlocked = localStorage.getItem('pbh_authorized') === 'true';
+
+    // Wait until the page loads so elements are ready
+    window.addEventListener("DOMContentLoaded", function() {
+        const mainContent = document.getElementById('hub-content') || document.body;
+
+        if (tokenInUrl === SECRET_ACCESS_TOKEN) {
+            localStorage.setItem('pbh_authorized', 'true');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            // Access granted, let them see the page
+        } else if (isUnlocked) {
+            // Already authorized from a previous visit
+        } else {
+            // Lock down: replace body with clean lock screen
+            document.body.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: #f8fafc; font-family: sans-serif;">
+                    <div style="text-align: center; max-width: 400px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                        <h2 style="color: #0f172a; margin-bottom: 16px;">🔒 Access Required</h2>
+                        <p style="color: #475569; margin-bottom: 24px; font-size: 15px;">This interactive hub requires an authorized school license to view.</p>
+                        <a href="https://positivelybehaving.gumroad.com" 
+                           style="display: inline-block; padding: 12px 24px; background: #e11d48; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px;">
+                           Get Access on Gumroad
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+    });
+})();
+</script>
         </div>
 
         <div class="p-6 md:p-8 space-y-6">
