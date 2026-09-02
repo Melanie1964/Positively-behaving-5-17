@@ -8,6 +8,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
+<style>
+    /* Hide the main app content by default */
+    #hub-content { display: none; }
+    /* Show the lock screen by default */
+    #lock-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f8fafc; font-family: sans-serif; margin: 0; }
+</style>
+
+<!-- Clean Lock Screen HTML built right into the page -->
+<div id="lock-screen">
+    <div style="text-align: center; max-width: 400px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <h2 style="color: #0f172a; margin-bottom: 16px;">🔒 Access Required</h2>
+        <p style="color: #475569; margin-bottom: 24px; font-size: 15px;">This interactive hub requires an authorized school license to view.</p>
+        <a href="https://positivelybehaving.gumroad.com" 
+           style="display: inline-block; padding: 12px 24px; background: #e11d48; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px;">
+           Get Access on Gumroad
+        </a>
+    </div>
+</div>
+
 <script>
 (function() {
     const SECRET_ACCESS_TOKEN = "PBH_SECURE_2026_ACCESS";
@@ -15,30 +34,22 @@
     const tokenInUrl = urlParams.get('access_token');
     const isUnlocked = localStorage.getItem('pbh_authorized') === 'true';
 
-    // Wait until the page loads so elements are ready
-    window.addEventListener("DOMContentLoaded", function() {
-        const mainContent = document.getElementById('hub-content') || document.body;
-
+    if (tokenInUrl === SECRET_ACCESS_TOKEN || isUnlocked) {
         if (tokenInUrl === SECRET_ACCESS_TOKEN) {
             localStorage.setItem('pbh_authorized', 'true');
             window.history.replaceState({}, document.title, window.location.pathname);
-            // Access granted, let them see the page
-        } else if (isUnlocked) {
-            // Already authorized from a previous visit
-        } else {
-            // Lock down: replace body with clean lock screen
-            document.body.innerHTML = `
-                <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: #f8fafc; font-family: sans-serif;">
-                    <div style="text-align: center; max-width: 400px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                        <h2 style="color: #0f172a; margin-bottom: 16px;">🔒 Access Required</h2>
-                        <p style="color: #475569; margin-bottom: 24px; font-size: 15px;">This interactive hub requires an authorized school license to view.</p>
-                        <a href="https://positivelybehaving.gumroad.com" 
-                           style="display: inline-block; padding: 12px 24px; background: #e11d48; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px;">
-                           Get Access on Gumroad
-                        </a>
-                    </div>
-                </div>
-            `;
+        }
+        
+        // Authorized! Hide the lock screen and show the rest of your page
+        document.addEventListener("DOMContentLoaded", function() {
+            const lockScreen = document.getElementById('lock-screen');
+            const hubContent = document.getElementById('hub-content');
+            if (lockScreen) lockScreen.style.display = 'none';
+            if (hubContent) hubContent.style.display = 'block';
+        });
+    }
+})();
+</script>
         }
     });
 })();
