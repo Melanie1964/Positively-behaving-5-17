@@ -25,22 +25,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
-<script>
-(function() {
-    const SECRET_ACCESS_TOKEN = "PBH_SECURE_2026_ACCESS";
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenInUrl = urlParams.get('access_token');
-    const isUnlocked = localStorage.getItem('pbh_authorized') === 'true';
-
-    if (tokenInUrl === SECRET_ACCESS_TOKEN) {
-        localStorage.setItem('pbh_authorized', 'true');
-        window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (!isUnlocked) {
-        window.location.replace("https://positivelybehaving.gumroad.com");
-    }
-})();
-</script>
-        <div class="p-6 md:p-8 space-y-6">
             
             <div id="questionnaireSection" class="space-y-6">
                 <div class="bg-[#eaf1f6] border-l-4 border-[#112233] p-4 rounded space-y-3">
