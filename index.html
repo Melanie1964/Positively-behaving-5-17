@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Positively Behaving - School-Age Teacher SDQ (5–17)</title>
+    <title>Positively Behaving - School-Age Teacher SDQ (5-17)</title>
+    
+    <script>
+    (function() {
+        const SECRET_ACCESS_TOKEN = "PBH_SECURE_2026_ACCESS";
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenInUrl = urlParams.get('access_token');
+        const isUnlocked = localStorage.getItem('pbh_authorized') === 'true';
+
+        if (tokenInUrl === SECRET_ACCESS_TOKEN) {
+            localStorage.setItem('pbh_authorized', 'true');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (!isUnlocked) {
+            window.location.replace("https://positivelybehaving.gumroad.com");
+        }
+    })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
